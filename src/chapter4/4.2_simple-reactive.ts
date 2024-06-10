@@ -1,5 +1,3 @@
-import { sleep } from "radash"
-
 //储存副作用的桶
 const bucket = new Set<() => unknown>()
 
@@ -8,11 +6,11 @@ const data = {text: 'hello world'}
 
 //副作用函数
 function effect() {
-    document.body.innerText = proxyObj.text
+    document.body.innerText = obj.text
 }
 
 //对原始数据的拦截
-const proxyObj = new Proxy(data, {
+const obj = new Proxy(data, {
     //拦截读取操作
     get(target, key: keyof typeof data) {
         bucket.add(effect)
@@ -30,7 +28,6 @@ const proxyObj = new Proxy(data, {
 
 effect()
 
-export async function test() {
-    await sleep(1000)
-    proxyObj.text = 'hello not vue'
+export function testSelf() {
+    obj.text = 'hello not vue'
 }
