@@ -4,6 +4,8 @@ on:
   push:
     branches: ['master']
 
+permissions:
+  contents: write
 
 jobs:
   test:
@@ -19,4 +21,23 @@ jobs:
       - name: Run Tests
         run: npm run test
 
+  deploy:
+    needs: [test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: npm install
+      
+      - name: Build
+        run: npm run build
+
+      - name: Deploy 
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: dist
 
