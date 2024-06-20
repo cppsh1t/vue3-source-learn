@@ -11,9 +11,11 @@ test('event-call-test', () => {
         type: 'button',
         props: {
             id: 'foo',
-            $onClick: () => {
+            $onClick: [() => {
                 result = 'holy shit'
-            },
+            }, () => {
+                console.log('evil shit')
+            }],
         },
         children: 'click button',
     }

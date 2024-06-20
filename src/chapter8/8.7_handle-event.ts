@@ -20,7 +20,11 @@ export function getDefaultRenderOption(): RenderOption {
                 if (nextValue) {
                     if (!invoker) {
                         invoker = (el as any)._eventInvoker[key] = (e: Event) => {
-                            invoker.value(e)
+                            if (Array.isArray(invoker.value)) {
+                                invoker.value.forEach((fn: (e: Event) => unknown) => fn(e))
+                            } else {
+                                invoker.value(e)
+                            }
                         }
                         invoker.value = nextValue
                         el.addEventListener(type!, invoker)
