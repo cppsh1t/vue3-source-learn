@@ -30,3 +30,5 @@ export type RenderOption = {
 
     patchProps: (el: Element, key: string, preValue: string | undefined, nextValue: string) => void
 }
+
+export type ClassItem = string | Record<string, boolean> | Array<ClassItem>

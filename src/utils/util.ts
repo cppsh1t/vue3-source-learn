@@ -1,3 +1,5 @@
+import { ClassItem } from './type'
+
 export function initRenderContainer() {
     let root = document.querySelector('#app')
     if (root !== undefined && root !== null) {
@@ -14,4 +16,27 @@ export function initRenderContainer() {
     root.setAttribute('id', 'app')
     document.body.appendChild(root)
     return root
+}
+
+
+
+export function processClass(classItem: ClassItem) {
+    if (typeof classItem === 'string') {
+        return classItem
+    }
+    else if (!Array.isArray(classItem)) {
+        let str = ''
+        for (const key in classItem) {
+            if (!classItem[key]) continue
+            str = str === '' ? key : `${str} ${key}`
+        }
+        return str
+    } else {
+        let str = ''
+        for(const item of classItem) {
+            const childStr = processClass(item)
+            str = str === '' ? childStr : `${str} ${childStr}`
+        }
+        return str
+    }
 }
