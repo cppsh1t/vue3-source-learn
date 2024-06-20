@@ -43,6 +43,7 @@ test('mount-test', () => {
     render(vnode, appContainer)
 
     const fooEle = document.querySelector('#foo')!
+    expect(fooEle).not.toBeNull()
     const childEle = fooEle.children[0]
     expect(childEle).not.toBeNull()
     const text = childEle.textContent
