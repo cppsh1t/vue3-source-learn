@@ -49,6 +49,31 @@ const router: Item[] = [
             ],
         },
         renderFunc: generateRenderFunc( (import('./../chapter8/8.1_mount-and-attribute')).then(r => r.createRenderer))
+    },
+    {
+        name: '8.3_set-attribute',
+        node: {
+            type: 'div',
+            children: [
+                {
+                    type: 'button',
+                    props: {
+                        disabled: '',
+                        id: 'btn1',
+                    },
+                    children: 'a button',
+                },
+                {
+                    type: 'button',
+                    props: {
+                        disabled: false,
+                        id: 'btn2',
+                    },
+                    children: 'a button',
+                },
+            ],
+        },
+        renderFunc: generateRenderFunc( (import('./../chapter8/8.3_set-attribute')).then(r => r.createRenderer))
     }
 ]
 

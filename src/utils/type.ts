@@ -1,4 +1,4 @@
-type VnodeProps = Record<string, string>
+type VnodeProps = Record<string, any>
 export type VNode = {
     type: keyof HTMLElementTagNameMap
     props?: VnodeProps
@@ -27,4 +27,6 @@ export type RenderOption = {
      * @param anchor just anchor
      */
     insert: (el: Element, parent: Element, anchor?: any) => void
+
+    patchProps: (el: Element, key: string, preValue: string | undefined, nextValue: string) => void
 }
