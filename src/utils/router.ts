@@ -1,5 +1,5 @@
-import { RenderOption, VNode } from "./type"
-import { initRenderContainer } from "./util"
+import { RenderOption, VNode } from './type'
+import { initRenderContainer } from './util'
 
 type Item = {
     name: string
@@ -7,14 +7,15 @@ type Item = {
     renderFunc: (vnode: VNode) => void
 }
 
-type RenderPromise = Promise<(options?: RenderOption)=> {
-    render: (vnode: VNode, container: Element) => void;
-}>
+type RenderPromise = Promise<
+    (options?: RenderOption) => {
+        render: (vnode: VNode, container: Element) => void
+    }
+>
 
 function generateRenderFunc(promise: RenderPromise) {
     return async (vnode: VNode) => {
         const appContainer = initRenderContainer()
-        console.log(appContainer.children.length)
         const { render } = (await promise)()
         render(vnode, appContainer)
     }
@@ -32,7 +33,7 @@ const router: Item[] = [
             children: '7.3_custom-renderer hello',
         },
         //@ts-ignore
-        renderFunc: generateRenderFunc((import('./../chapter7/7.3_custom-renderer')).then(r => r.createRenderer))
+        renderFunc: generateRenderFunc(import('./../chapter7/7.3_custom-renderer').then((r) => r.createRenderer)),
     },
     {
         name: '8.1_mount-and-attribute',
@@ -48,7 +49,7 @@ const router: Item[] = [
                 },
             ],
         },
-        renderFunc: generateRenderFunc( (import('./../chapter8/8.1_mount-and-attribute')).then(r => r.createRenderer))
+        renderFunc: generateRenderFunc(import('./../chapter8/8.1_mount-and-attribute').then((r) => r.createRenderer)),
     },
     {
         name: '8.3_set-attribute',
@@ -73,8 +74,23 @@ const router: Item[] = [
                 },
             ],
         },
-        renderFunc: generateRenderFunc( (import('./../chapter8/8.3_set-attribute')).then(r => r.createRenderer))
-    }
+        renderFunc: generateRenderFunc(import('./../chapter8/8.3_set-attribute').then((r) => r.createRenderer)),
+    },
+    {
+        name: '8.7_handle-event',
+        node: {
+            type: 'button',
+            props: {
+                id: 'foo',
+                $onClick: () => {
+                    alert('you clickedm me')
+                },
+                class: 'item'
+            },
+            children: 'click button'
+        },
+        renderFunc: generateRenderFunc(import('./../chapter8/8.7_handle-event').then((r) => r.createRenderer)),
+    },
 ]
 
 export function initRouter() {

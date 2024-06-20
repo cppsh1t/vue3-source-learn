@@ -3,7 +3,7 @@ export type VNode = {
     type: keyof HTMLElementTagNameMap
     props?: VnodeProps
     children?: string | VNode[]
-    el?: Element 
+    el?: Element
 }
 
 export type RenderOption = {
@@ -29,7 +29,14 @@ export type RenderOption = {
      */
     insert: (el: Element, parent: Element, anchor?: any) => void
 
-    patchProps: (el: Element, key: string, preValue: string | undefined, nextValue: string) => void
+    /**
+     * patch props for element
+     * @param el the element will be patched
+     * @param key the key of patch
+     * @param preValue
+     * @param nextValue
+     */
+    patchProps: (el: Element, key: string, preValue: any | undefined, nextValue: any) => void
 }
 
 export type ClassItem = string | Record<string, boolean> | Array<ClassItem>
