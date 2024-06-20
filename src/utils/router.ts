@@ -7,14 +7,15 @@ type Item = {
     renderFunc: (vnode: VNode) => void
 }
 
-
-function generateRenderFunc(func: (options?: RenderOption)=> {
+type RenderPromise = Promise<(options?: RenderOption)=> {
     render: (vnode: VNode, container: Element) => void;
-}) {
-    return (vnode: VNode) => {
+}>
+
+function generateRenderFunc(promise: RenderPromise) {
+    return async (vnode: VNode) => {
         const appContainer = initRenderContainer()
         console.log(appContainer.children.length)
-        const { render } = func()
+        const { render } = (await promise)()
         render(vnode, appContainer)
     }
 }
@@ -31,7 +32,7 @@ const router: Item[] = [
             children: '7.3_custom-renderer hello',
         },
         //@ts-ignore
-        renderFunc: generateRenderFunc((await (import('./../chapter7/7.3_custom-renderer'))).createRenderer)
+        renderFunc: generateRenderFunc((import('./../chapter7/7.3_custom-renderer')).then(r => r.createRenderer))
     },
     {
         name: '8.1_mount-and-attribute',
@@ -47,7 +48,7 @@ const router: Item[] = [
                 },
             ],
         },
-        renderFunc: generateRenderFunc((await (import('./../chapter8/8.1_mount-and-attribute'))).createRenderer)
+        renderFunc: generateRenderFunc( (import('./../chapter8/8.1_mount-and-attribute')).then(r => r.createRenderer))
     }
 ]
 
