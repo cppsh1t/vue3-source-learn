@@ -3,6 +3,7 @@ export type VNode = {
     type: keyof HTMLElementTagNameMap
     props?: VnodeProps
     children?: string | VNode[]
+    el?: Element 
 }
 
 export type RenderOption = {
