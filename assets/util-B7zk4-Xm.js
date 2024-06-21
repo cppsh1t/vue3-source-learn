@@ -1,0 +1,1 @@
+function t(){let e=document.querySelector("#app");if(e!=null){for(e.innerHTML="";e.attributes.length>0;)e.removeAttribute(e.attributes[0].name);return e._vnode=void 0,e.id="app",e}return e=document.createElement("div"),e.setAttribute("id","app"),document.body.appendChild(e),e}export{t as i};
