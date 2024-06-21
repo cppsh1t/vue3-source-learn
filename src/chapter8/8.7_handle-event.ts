@@ -77,6 +77,7 @@ export function createRenderer(options: RenderOption = defaultRenderOptions) {
     const { createElement, insert, setElementText, patchProps } = options
 
     function mountElement(node: VNode, container: Element) {
+        //@ts-ignore
         const el = (node.el = createElement(node.type))
         if (typeof node.children === 'string') {
             setElementText(el, node.children)

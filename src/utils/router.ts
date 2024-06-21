@@ -1,23 +1,6 @@
-import { RenderOption, VNode } from './type'
-import { initRenderContainer } from './util'
-
 export type RendererItem = {
     name: string
     doRender: () => void
-}
-
-type RenderPromise = Promise<
-    (options?: RenderOption) => {
-        render: (vnode: VNode, container: Element) => void
-    }
->
-
-function generateRenderFunc(promise: RenderPromise) {
-    return async (vnode: VNode) => {
-        const appContainer = initRenderContainer()
-        const { render } = (await promise)()
-        render(vnode, appContainer)
-    }
 }
 
 const router: (RendererItem | Promise<RendererItem>)[] = [
@@ -26,6 +9,7 @@ const router: (RendererItem | Promise<RendererItem>)[] = [
     import('./../chapter8/8.3_set-attribute').then((r) => r.rendererItem),
     import('./../chapter8/8.7_handle-event').then((r) => r.rendererItem),
     import('./../chapter8/8.8_event-bubble').then((r) => r.rendererItem),
+    import('./../chapter8/8.10_comment-and-text').then((r) => r.rendererItem),
 ]
 
 export async function initRouter() {

@@ -11,7 +11,7 @@ export function getDefaultRenderOption(): RenderOption {
         setElementText: function (el: Element, text: string): void {
             el.textContent = text
         },
-        insert: function (el: Element, parent: Element, anchor?: any): void {
+        insert: function (el: Element | Text | Comment, parent: Element, anchor?: any): void {
             parent.appendChild(el)
         },
         patchProps: function (el: Element, key: string, preValue: any | undefined, nextValue: any): void {
@@ -52,6 +52,15 @@ export function getDefaultRenderOption(): RenderOption {
                 el.setAttribute(key, nextValue)
             }
         },
+        createText(text) {
+            return document.createTextNode(text)
+        },
+        setText(el, text) {
+            el.nodeValue = text
+        },
+        createComment(text) {
+            return document.createComment(text)
+        }
     }
 }
 
@@ -71,17 +80,18 @@ function isEvent(eventString: string) {
 }
 
 function unmount(node: VNode) {
-    const el = (node as any)._vnode.el as Element
-    const parent = el.parentNode
-    if (parent) parent.removeChild(el)
+    const el = (node as any)._vnode?.el as Element
+    if (el) {
+        const parent = el?.parentNode
+        if (parent) parent.removeChild(el)
+    }
 }
 
 export function createRenderer(options: RenderOption = defaultRenderOptions) {
-    const { createElement, insert, setElementText, patchProps } = options
+    const { createElement, insert, setElementText, patchProps, createText, setText, createComment } = options
 
     function mountElement(node: VNode, container: Element) {
-        //@ts-ignore
-        const el = (node.el = createElement(node.type))
+        const el = (node.el = createElement(node.type as unknown as keyof HTMLElementTagNameMap))
         if (typeof node.children === 'string') {
             setElementText(el, node.children)
         } else if (Array.isArray(node.children)) {
@@ -108,25 +118,75 @@ export function createRenderer(options: RenderOption = defaultRenderOptions) {
         }
         for (const key in oldProps) {
             if (!(key in newProps)) {
-                patchProps(el, key, oldProps[key], null)
+                patchProps(el, key, oldProps[key], undefined)
+            }
+        }
+        patchChildren(preNode, nextNode, el)
+    }
+
+    function patchChildren(preNode: VNode, nextNode: VNode, container: Element) {
+        if (typeof nextNode.children === 'string') {
+            if (Array.isArray(preNode.children)) {
+                preNode.children.forEach((c) => unmount(c))
+            }
+            setElementText(container, nextNode.children)
+        } else if (Array.isArray(nextNode.children)) {
+            if (Array.isArray(preNode.children)) {
+                //TODO: Diff in future
+                preNode.children.forEach((c) => unmount(c))
+                nextNode.children.forEach((c) => patch(undefined, c, container))
+            } else {
+                setElementText(container, '')
+                nextNode.children.forEach((c) => patch(undefined, c, container))
+            }
+        } else {
+            if (Array.isArray(preNode.children)) {
+                preNode.children.forEach((c) => unmount(c))
+            } else if (typeof preNode.children === 'string') {
+                setElementText(container, '')
             }
         }
     }
 
-    function patch(n1: VNode | undefined, n2: VNode, container: Element) {
-        if (n1 && n1.type !== n2.type) {
-            unmount(n1)
-            n1 = undefined
+    function patch(preNode: VNode | undefined, nextNode: VNode, container: Element) {
+        if (preNode && preNode.type !== nextNode.type) {
+            unmount(preNode)
+            preNode = undefined
         }
-        if (typeof n2.type === 'string') {
-            if (!n1) {
-                mountElement(n2, container)
+        if (nextNode.type === 'text') {
+            if (!preNode) {
+                //@ts-ignore
+                const el = (nextNode.el = createText(nextNode.children as string))
+                insert(el, container)
             } else {
-                patchElement(n1, n2)
+                const el = (nextNode.el = preNode.el)
+                if (nextNode.children !== preNode.children) {
+                    el && setText(el as unknown as Text, nextNode.children as string)
+                }
             }
-        } else if (typeof n2.type === 'object') {
+        } else if (nextNode.type === 'comment') {
+            if (!preNode) {
+                //@ts-ignore
+                const el = (nextNode.el = createComment(nextNode.children as string))
+                insert(el, container)
+            } else {
+                const el = (nextNode.el = preNode.el)
+                if (nextNode.children !== preNode.children) {
+                    unmount(preNode)
+                    //@ts-ignore
+                    const el = (nextNode.el = createComment(nextNode.children as string))
+                    insert(el, container)
+                }
+            }
+        } else if (typeof nextNode.type === 'string') {
+            if (!preNode) {
+                mountElement(nextNode, container)
+            } else {
+                patchElement(preNode, nextNode)
+            }
+        } else if (typeof nextNode.type === 'object') {
             //component
-        } else if (n2.type === 'xxx') {
+        } else if (nextNode.type === 'xxx') {
             //other types
         }
     }
@@ -147,39 +207,24 @@ export function createRenderer(options: RenderOption = defaultRenderOptions) {
     }
 }
 
-
 export const rendererItem: RendererItem = {
-    name: "8.8_event-bubble",
+    name: '8.10_comment-and-text',
     doRender: function () {
         const appContainer = initRenderContainer()
         const { render } = createRenderer()
-        const bol = ref(false)
-        let num = 0
-
-        effect(() => {
-            const vnode: VNode = {
-                type: 'div',
-                props: bol.value
-                    ? {
-                          $onClick: () => {
-                            num++
-                              alert('父元素 clicked')
-                          },
-                      }
-                    : {},
-                children: [
-                    {
-                        type: 'p',
-                        props: {
-                            $onClick: () => {
-                                bol.value = true
-                            },
-                        },
-                        children: 'text',
-                    },
-                ],
-            }
-            render(vnode, appContainer)
-        })
-    }
+        const vnode: VNode = {
+            type: 'div',
+            children: [
+                {
+                    type: 'text',
+                    children: 'just text',
+                },
+                {
+                    type: 'comment',
+                    children: 'cant see me'
+                }
+            ],
+        }
+        render(vnode, appContainer)
+    },
 }
