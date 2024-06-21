@@ -1,4 +1,6 @@
+import { RendererItem } from '../utils/router'
 import { RenderOption, VNode } from '../utils/type'
+import { initRenderContainer } from '../utils/util'
 
 export function getDefaultRenderOption(): RenderOption {
     return {
@@ -80,5 +82,35 @@ export function createRenderer(options: RenderOption = defaultRenderOptions) {
 
     return {
         render,
+    }
+}
+
+export const rendererItem: RendererItem = {
+    name: "8.3_set-attribute",
+    doRender: function () {
+        const appContainer = initRenderContainer()
+        const { render } = createRenderer()
+        const vnode = {
+            type: 'div',
+            children: [
+                {
+                    type: 'button',
+                    props: {
+                        disabled: '',
+                        id: 'btn1',
+                    },
+                    children: 'a button',
+                },
+                {
+                    type: 'button',
+                    props: {
+                        disabled: false,
+                        id: 'btn2',
+                    },
+                    children: 'a button',
+                },
+            ],
+        }
+        render(vnode as VNode, appContainer)
     }
 }

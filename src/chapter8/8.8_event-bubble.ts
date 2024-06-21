@@ -1,4 +1,7 @@
+import { effect, ref } from '../chapter6/6.3_unwrapper-ref'
+import { RendererItem } from '../utils/router'
 import { RenderOption, VNode } from '../utils/type'
+import { initRenderContainer } from '../utils/util'
 
 export function getDefaultRenderOption(): RenderOption {
     return {
@@ -140,5 +143,42 @@ export function createRenderer(options: RenderOption = defaultRenderOptions) {
 
     return {
         render,
+    }
+}
+
+
+export const rendererItem: RendererItem = {
+    name: "8.8_event-bubble",
+    doRender: function () {
+        const appContainer = initRenderContainer()
+        const { render } = createRenderer()
+        const bol = ref(false)
+        let num = 0
+
+        effect(() => {
+            const vnode: VNode = {
+                type: 'div',
+                props: bol.value
+                    ? {
+                          $onClick: () => {
+                            num++
+                              alert('父元素 clicked')
+                          },
+                      }
+                    : {},
+                children: [
+                    {
+                        type: 'p',
+                        props: {
+                            $onClick: () => {
+                                bol.value = true
+                            },
+                        },
+                        children: 'text',
+                    },
+                ],
+            }
+            render(vnode, appContainer)
+        })
     }
 }

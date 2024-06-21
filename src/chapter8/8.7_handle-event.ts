@@ -1,4 +1,6 @@
+import { RendererItem } from '../utils/router'
 import { RenderOption, VNode } from '../utils/type'
+import { initRenderContainer } from '../utils/util'
 
 export function getDefaultRenderOption(): RenderOption {
     return {
@@ -125,5 +127,25 @@ export function createRenderer(options: RenderOption = defaultRenderOptions) {
 
     return {
         render,
+    }
+}
+
+export const rendererItem: RendererItem = {
+    name: "8.7_handle-event",
+    doRender: function () {
+        const appContainer = initRenderContainer()
+        const { render } = createRenderer()
+        const vnode = {
+            type: 'button',
+            props: {
+                id: 'foo',
+                $onClick: () => {
+                    alert('you clickedm me')
+                },
+                class: 'item',
+            },
+            children: 'click button',
+        }
+        render(vnode as VNode, appContainer)
     }
 }

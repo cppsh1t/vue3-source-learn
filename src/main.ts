@@ -1,3 +1,3 @@
-import { initRouter } from "./utils/router"
+import { initRouter } from './utils/router'
 
 initRouter()

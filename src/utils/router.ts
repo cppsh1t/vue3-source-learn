@@ -1,10 +1,9 @@
 import { RenderOption, VNode } from './type'
 import { initRenderContainer } from './util'
 
-type Item = {
+export type RendererItem = {
     name: string
-    node: VNode
-    renderFunc: (vnode: VNode) => void
+    doRender: () => void
 }
 
 type RenderPromise = Promise<
@@ -21,79 +20,15 @@ function generateRenderFunc(promise: RenderPromise) {
     }
 }
 
-function doRender(item: Item) {
-    item.renderFunc(item.node)
-}
-
-const router: Item[] = [
-    {
-        name: '7.3_custom-renderer',
-        node: {
-            type: 'h1',
-            children: '7.3_custom-renderer hello',
-        },
-        //@ts-ignore
-        renderFunc: generateRenderFunc(import('./../chapter7/7.3_custom-renderer').then((r) => r.createRenderer)),
-    },
-    {
-        name: '8.1_mount-and-attribute',
-        node: {
-            type: 'div',
-            props: {
-                id: 'foo',
-            },
-            children: [
-                {
-                    type: 'p',
-                    children: 'hello',
-                },
-            ],
-        },
-        renderFunc: generateRenderFunc(import('./../chapter8/8.1_mount-and-attribute').then((r) => r.createRenderer)),
-    },
-    {
-        name: '8.3_set-attribute',
-        node: {
-            type: 'div',
-            children: [
-                {
-                    type: 'button',
-                    props: {
-                        disabled: '',
-                        id: 'btn1',
-                    },
-                    children: 'a button',
-                },
-                {
-                    type: 'button',
-                    props: {
-                        disabled: false,
-                        id: 'btn2',
-                    },
-                    children: 'a button',
-                },
-            ],
-        },
-        renderFunc: generateRenderFunc(import('./../chapter8/8.3_set-attribute').then((r) => r.createRenderer)),
-    },
-    {
-        name: '8.7_handle-event',
-        node: {
-            type: 'button',
-            props: {
-                id: 'foo',
-                $onClick: () => {
-                    alert('you clickedm me')
-                },
-                class: 'item'
-            },
-            children: 'click button'
-        },
-        renderFunc: generateRenderFunc(import('./../chapter8/8.7_handle-event').then((r) => r.createRenderer)),
-    },
+const router: (RendererItem | Promise<RendererItem>)[] = [
+    import('./../chapter7/7.3_custom-renderer').then((r) => r.rendererItem),
+    import('./../chapter8/8.1_mount-and-attribute').then((r) => r.rendererItem),
+    import('./../chapter8/8.3_set-attribute').then((r) => r.rendererItem),
+    import('./../chapter8/8.7_handle-event').then((r) => r.rendererItem),
+    import('./../chapter8/8.8_event-bubble').then((r) => r.rendererItem),
 ]
 
-export function initRouter() {
+export async function initRouter() {
     let homeEle = document.querySelector('#home')
     if (!homeEle) {
         homeEle = document.createElement('div')
@@ -101,9 +36,13 @@ export function initRouter() {
     }
     for (const item of router) {
         const btn = document.createElement('button')
-        btn.textContent = item.name
+        if (Object.prototype.toString.call(item) === '[object Promise]') {
+            
+        }
+        const rendererItem = Object.prototype.toString.call(item) === '[object Promise]' ? (await (await item as unknown as Promise<RendererItem>)) : item as RendererItem
+        btn.textContent = rendererItem.name
         btn.className = 'item'
-        btn.addEventListener('click', () => doRender(item))
+        btn.addEventListener('click', rendererItem.doRender)
         homeEle.appendChild(btn)
     }
 }

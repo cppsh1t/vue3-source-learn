@@ -1,3 +1,6 @@
+import { RendererItem } from "../utils/router"
+import { initRenderContainer } from "../utils/util"
+
 export type VNode = {
     type: keyof HTMLElementTagNameMap
     children: string | unknown[]
@@ -90,5 +93,18 @@ export function createRenderer(options: RenderOption = defaultRenderOptions) {
 
     return {
         render,
+    }
+}
+
+export const rendererItem: RendererItem = {
+    name: "7.3_custom-renderer",
+    doRender: function () {
+        const appContainer = initRenderContainer()
+        const { render } = createRenderer()
+        const vnode = {
+            type: 'h1',
+            children: '7.3_custom-renderer hello',
+        }
+        render(vnode as VNode, appContainer)
     }
 }

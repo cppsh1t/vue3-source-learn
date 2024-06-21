@@ -1,3 +1,6 @@
+import { RendererItem } from "../utils/router"
+import { initRenderContainer } from "../utils/util"
+
 type VnodeProps = Record<string, string>
 export type VNode = {
     type: keyof HTMLElementTagNameMap
@@ -100,5 +103,26 @@ export function createRenderer(options: RenderOption = defaultRenderOptions) {
 
     return {
         render,
+    }
+}
+
+export const rendererItem: RendererItem = {
+    name: "8.1_mount-and-attribute",
+    doRender: function () {
+        const appContainer = initRenderContainer()
+        const { render } = createRenderer()
+        const vnode = {
+            type: 'div',
+            props: {
+                id: 'foo',
+            },
+            children: [
+                {
+                    type: 'p',
+                    children: 'hello',
+                },
+            ],
+        }
+        render(vnode as VNode, appContainer)
     }
 }
