@@ -1,7 +1,7 @@
 type VnodeProps = Record<string, any>
 
 export type VNode = {
-    type: keyof HTMLElementTagNameMap | 'text' | 'comment'
+    type: keyof HTMLElementTagNameMap | 'text' | 'comment' | 'fragment'
     props?: VnodeProps
     children?: string | VNode[]
     el?: Element

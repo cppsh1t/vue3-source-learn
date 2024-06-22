@@ -10,6 +10,7 @@ const router: (RendererItem | Promise<RendererItem>)[] = [
     import('./../chapter8/8.7_handle-event').then((r) => r.rendererItem),
     import('./../chapter8/8.8_event-bubble').then((r) => r.rendererItem),
     import('./../chapter8/8.10_comment-and-text').then((r) => r.rendererItem),
+    import('./../chapter8/8.11_fragment').then((r) => r.rendererItem),
 ]
 
 export async function initRouter() {
