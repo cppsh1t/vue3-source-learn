@@ -11,6 +11,7 @@ export function getDefaultRenderOption(): RenderOption {
         setElementText: function (el: Element, text: string): void {
             el.textContent = text
         },
+        //@ts-ignore
         insert: function (el: Element, parent: Element, anchor?: any): void {
             parent.appendChild(el)
         },
