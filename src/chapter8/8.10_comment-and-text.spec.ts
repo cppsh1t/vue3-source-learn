@@ -21,5 +21,6 @@ test('text-node-test', () => {
     }
     render(vnode, appContainer)
     expect(appContainer.textContent).toEqual('just text')
-    // expect(appContainer.children[1].nodeValue).toEqual('cant see me')
+    expect(appContainer.children[0].childNodes[0].nodeValue).toEqual('just text')
+    expect(appContainer.children[0].childNodes[1].nodeValue).toEqual('cant see me')
 })

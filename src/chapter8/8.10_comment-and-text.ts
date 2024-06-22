@@ -226,5 +226,9 @@ export const rendererItem: RendererItem = {
             ],
         }
         render(vnode, appContainer)
+        const coll = appContainer.children[0]
+        for(const child of coll.childNodes) {
+            console.log(child.nodeValue)
+        }
     },
 }
