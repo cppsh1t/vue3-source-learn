@@ -1,4 +1,7 @@
+import { sleep } from 'radash'
+import { RendererItem } from '../utils/router'
 import { RenderOption, VNode } from '../utils/type'
+import { initRenderContainer } from '../utils/util'
 
 export function getDefaultRenderOption(): RenderOption {
     return {
@@ -135,21 +138,15 @@ export function createRenderer(options: RenderOption = defaultRenderOptions) {
             if (Array.isArray(preNode.children)) {
                 const oldChildren = preNode.children!
                 const newChildren = nextNode.children!
-                const oldLength = oldChildren.length
-                const newLength = newChildren.length
-                const commonLength = Math.min(oldLength, newLength)
-                for (let i = 0; i < commonLength; i++) {
-                    patch(oldChildren[i], newChildren[i], container)
-                }
-                // 如果 newLen > oldLen，说明有新子节点需要挂载
-                if (newLength > oldLength) {
-                    for (let i = commonLength; i < newLength; i++) {
-                        patch(undefined, newChildren[i], container)
-                    }
-                } else if (oldLength > newLength) {
-                    // 如果 oldLen > newLen，说明有旧子节点需要卸载
-                    for (let i = commonLength; i < oldLength; i++) {
-                        unmount(oldChildren[i])
+                
+                for (let i = 0; i < newChildren.length; i++) {
+                    const newVNode = newChildren[i]
+                    for (let j = 0; j < oldChildren.length; j++) {
+                        const oldVNode = oldChildren[j]
+                        if (newVNode.key === oldVNode.key) {
+                            patch(oldVNode, newVNode, container)
+                            break
+                        }
                     }
                 }
             } else {
@@ -228,4 +225,32 @@ export function createRenderer(options: RenderOption = defaultRenderOptions) {
     return {
         render,
     }
+}
+
+export const rendererItem: RendererItem = {
+    name: '9.2_dom-reuse',
+    doRender: function () {
+        const appContainer = initRenderContainer()
+        const { render } = createRenderer()
+        const oldVNode: VNode = {
+            type: 'div',
+            children: [
+                { type: 'p', children: '1', key: 1 },
+                { type: 'p', children: '2', key: 2 },
+                { type: 'p', children: 'hello', key: 3 },
+            ],
+        }
+        
+        const newVNode: VNode = {
+            type: 'div',
+            children: [
+                { type: 'p', children: 'world', key: 3 },
+                { type: 'p', children: '1', key: 1 },
+                { type: 'p', children: '2', key: 2 },
+            ],
+        }
+        
+        render(oldVNode, appContainer)
+        sleep(300).then(() => render(newVNode, appContainer))
+    },
 }
