@@ -4,7 +4,7 @@ import { createRenderer } from './9.5_new-element'
 import { VNode } from '../utils/type'
 import { sleep } from 'radash'
 
-test('move-element-test', async () => {
+test('add-element-test', async () => {
     const appContainer = initRenderContainer()
     const { render } = createRenderer()
     const oldVNode: VNode = {
