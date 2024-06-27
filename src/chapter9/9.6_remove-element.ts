@@ -88,7 +88,7 @@ function unmount(node: VNode) {
         ;(node.children as VNode[]).forEach(unmount)
         return
     }
-    const el = (node as any)._vnode?.el as Element
+    const el = node.el as (Element | Text | Comment)
     if (el) {
         const parent = el?.parentNode
         if (parent) parent.removeChild(el)
@@ -192,6 +192,14 @@ export function createRenderer(options: RenderOption = defaultRenderOptions) {
                         patch(undefined, newVNode, container, anchor as unknown as Element)
                     }
                 }
+
+                for (let i = 0; i < oldChildren.length; i++) {
+                    const oldVNode = oldChildren[i]
+                    const has = newChildren.find(node => oldVNode.key === node.key)
+                    if (!has) {
+                        unmount(oldVNode)
+                    } 
+                }
             } else {
                 setElementText(container, '')
                 nextNode.children.forEach((c) => patch(undefined, c, container))
@@ -269,7 +277,7 @@ export function createRenderer(options: RenderOption = defaultRenderOptions) {
 }
 
 export const rendererItem: RendererItem = {
-    name: '9.5_new-element',
+    name: '9.6_remove-element',
     doRender: function () {
         const appContainer = initRenderContainer()
         const { render } = createRenderer()
@@ -282,6 +290,7 @@ export const rendererItem: RendererItem = {
                 { type: 'p', children: '1 to 2', key: 1, props: { id: 'ele1' } },
                 { type: 'p', children: '2 to 3', key: 2, props: { id: 'ele2' } },
                 { type: 'p', children: 'hello 3 to 1', key: 3, props: { id: 'ele3' } },
+                { type: 'p', children: 'old old old', key: 4, props: { id: 'ele4' } },
             ],
         }
     
@@ -292,7 +301,6 @@ export const rendererItem: RendererItem = {
             },
             children: [
                 { type: 'p', children: 'world now 1', key: 3, props: { id: 'ele3' } },
-                { type: 'p', children: 'new new new', key: 4, props: { id: 'ele4' } },
                 { type: 'p', children: '1 now 3', key: 1, props: { id: 'ele1' } },
                 { type: 'p', children: '2 now 4', key: 2, props: { id: 'ele2' } },
             ],
