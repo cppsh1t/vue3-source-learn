@@ -165,29 +165,51 @@ export function createRenderer(options: RenderOption = defaultRenderOptions) {
         let oldEndVNode = oldChildren[oldEndIndex]
         let newStartVNode = newChildren[newStartIndex]
         let newEndVNode = newChildren[newEndIndex]
-        if (oldStartVNode.key === newStartVNode.key) {
-            patch(oldStartVNode, newStartVNode, container)
-            // 更新相关索引，指向下一个位置
-            oldStartVNode = oldChildren[++oldStartIndex]
-            newStartVNode = newChildren[++newStartIndex]
-        } else if (oldEndVNode.key === newEndVNode.key) {
-            // 节点在新的顺序中仍然处于尾部，不需要移动，但仍需打补丁
-            patch(oldEndVNode, newEndVNode, container)
-            // 更新索引和头尾部节点变量
-            oldEndVNode = oldChildren[--oldEndIndex]
-            newEndVNode = newChildren[--newEndIndex]
-        } else if (oldStartVNode.key === newEndVNode.key) {
-            patch(oldStartVNode, newEndVNode, container)
-            insert(oldStartVNode.el!, container, oldEndVNode.el!.nextSibling)
-            oldStartVNode = oldChildren[++oldStartIndex]
-            newEndVNode = newChildren[--newEndIndex]
-        } else if (oldEndVNode.key === newStartVNode.key) {
-            patch(oldEndVNode, newStartVNode, container)
-            // oldEndVNode.el 移动到 oldStartVNode.el 前面
-            insert(oldEndVNode.el!, container, oldStartVNode.el!)
-            // 移动 DOM 完成后，更新索引值，并指向下一个位置
-            oldEndVNode = oldChildren[--oldEndIndex]
-            newStartVNode = newChildren[++newStartIndex]
+
+        while (oldStartIndex <= oldEndIndex && newStartIndex <= newEndIndex) {
+            if (!oldStartVNode) {
+                oldStartVNode = oldChildren[++oldStartIndex]
+            } else if (!oldEndVNode) {
+                oldEndVNode = newChildren[--oldEndIndex]
+            } else if (oldStartVNode.key === newStartVNode.key) {
+                patch(oldStartVNode, newStartVNode, container)
+                // 更新相关索引，指向下一个位置
+                oldStartVNode = oldChildren[++oldStartIndex]
+                newStartVNode = newChildren[++newStartIndex]
+            } else if (oldEndVNode.key === newEndVNode.key) {
+                // 节点在新的顺序中仍然处于尾部，不需要移动，但仍需打补丁
+                patch(oldEndVNode, newEndVNode, container)
+                // 更新索引和头尾部节点变量
+                oldEndVNode = oldChildren[--oldEndIndex]
+                newEndVNode = newChildren[--newEndIndex]
+            } else if (oldStartVNode.key === newEndVNode.key) {
+                patch(oldStartVNode, newEndVNode, container)
+                insert(oldStartVNode.el!, container, oldEndVNode.el!.nextSibling)
+                oldStartVNode = oldChildren[++oldStartIndex]
+                newEndVNode = newChildren[--newEndIndex]
+            } else if (oldEndVNode.key === newStartVNode.key) {
+                patch(oldEndVNode, newStartVNode, container)
+                // oldEndVNode.el 移动到 oldStartVNode.el 前面
+                insert(oldEndVNode.el!, container, oldStartVNode.el!)
+                // 移动 DOM 完成后，更新索引值，并指向下一个位置
+                oldEndVNode = oldChildren[--oldEndIndex]
+                newStartVNode = newChildren[++newStartIndex]
+            } else {
+                // 遍历旧的一组子节点，试图寻找与 newStartVNode 拥有相同 key 值的节点
+                // idxInOld 就是新的一组子节点的头部节点在旧的一组子节点中的索引
+                const idxInOld = oldChildren.findIndex((node) => node.key === newStartVNode.key)
+                if (idxInOld <= 0) continue
+                // idxInOld 位置对应的 vnode 就是需要移动的节点
+                const vnodeToMove = oldChildren[idxInOld]
+                // 不要忘记除移动操作外还应该打补丁
+                patch(vnodeToMove, newStartVNode, container)
+                // 将 vnodeToMove.el 移动到头部节点 oldStartVNode.el 之前，因此使用后者作为锚点
+                insert(vnodeToMove.el!, container, oldStartVNode.el)
+                // 由于位置 idxInOld 处的节点所对应的真实 DOM 已经移动到了别处，因此将其设置为 undefined
+                oldChildren[idxInOld] = undefined as unknown as VNode
+                // 最后更新 newStartIdx 到下一个位置
+                newStartVNode = newChildren[++newStartIndex]
+            }
         }
     }
 
@@ -253,4 +275,3 @@ export function createRenderer(options: RenderOption = defaultRenderOptions) {
         render,
     }
 }
-
